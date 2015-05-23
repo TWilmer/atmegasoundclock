@@ -1,0 +1,26 @@
+
+
+Pin 6White D-   ... 1.5k to Plus 
+Pin 4 Green D+
+
+
+Data connected via 1k each (4 times)
+DISCONNECT USB!!!!
+
+PCB:
+Grey   - GND   -  25 GND
+Red    - 3.3 V -  18 3.3 V
+Brown  - SCK   -  23 SCLK
+Yellow - MISO  -  21 MISO
+Green  - MOSI  -  19 MOSI
+Green/W- Reset -  15 GPIO 22
+
+PI:  connector up left
+use the right down connections - left to right
+
+Green/W- Reset -  15 GPIO 22
+Red    - 3.3 V -  18 3.3 V
+Green  - MOSI  -  19 MOSI
+Yellow - MISO  -  21 MISO
+Brown  - SCK   -  23 SCLK
+Grey   - GND   -  25 GND
