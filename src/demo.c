@@ -23,40 +23,74 @@ different port or bit, change the macros below:
 #include <avr/wdt.h>
 #include <avr/interrupt.h>  /* for sei() */
 #include <util/delay.h>     /* for _delay_ms() */
-#include "sin.h"
 
+#include "hw.h"
+#include "BCD2bin8.h"
+#include "time.h"
+#include "sound.h"
 /* ------------------------------------------------------------------------- */
+
+
 
 int __attribute__((noreturn)) main(void)
 {
-
-   ADCSRA =0; // disable ADC to save power
    wdt_enable(WDTO_1S);
-   PRR&=~_BV(PRTIM2); 
+
+
+   CLKPR=_BV(CLKPCE) | 0;
+   CLKPR=0;
+   ADCSRA =0; // disable ADC to save power
+   PRR&=~_BV(PRTIM2);
+   PRR&=~_BV(PRTIM1);
+   PRR&=~_BV(PRTIM0);   
     /* Even if you don't use the watchdog, turn it off here. On newer devices,
      * the status of the watchdog (on/off, period) is PRESERVED OVER RESET!
      */
 
-    TCCR2A =  0x00;
-    TCCR2A |= _BV (COM2A1) | _BV (COM2B1) | _BV (WGM20);
-    TCCR2A &= ~(_BV (COM2A0) | _BV (COM2B0));
-    TCNT2 = 0; 
-        PORTD &= ~(_BV (PORTD3));
-	 DDRD |= _BV (DDD3);
-        uint8_t l=0;
-	  TCCR2B |= _BV (CS20);
-    uint8_t count=0;
-    uint8_t level=0;
-    uint8_t delay=0;
-    uint8_t n=0;
-    uint8_t i=0;
- 
+
+    soundInit();
+ initTime();
+
+ initHw();
+    ;
     for(;;){                /* main event loop */
-	i++;
-                OCR2B=pgm_read_byte_near(sine+i);
+        
         wdt_reset();
-        displayPoll();
+        doTimeTick();
+        setDotDisplay(5);
+        uint16_t v=Bin2bcd8(getMinutes());
+           uint16_t v2=Bin2bcd8(getSeconds());  
+       setDisplay( v >> 8, v ,v2>>8,v2);
+       if(40==getSeconds())
+       {
+          playClock();
+       }
+       if(10==getSeconds())
+       {
+          playGo();
+       }
+       if(20==getSeconds())
+       {
+          playFinished();
+       }
+       if(25==getSeconds())
+       {
+          playTimer();
+       }
+       if(5==getSeconds())
+       {
+          playHour();
+       }
+       if(35==getSeconds())
+       {
+          playMinute();
+       }
+      doMultiPlex();
+         PIND=_BV(2);
+        
+      
     }
+   
 }
 
 /* ------------------------------------------------------------------------- */
