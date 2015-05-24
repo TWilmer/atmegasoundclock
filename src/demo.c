@@ -23,6 +23,7 @@ different port or bit, change the macros below:
 #include <avr/wdt.h>
 #include <avr/interrupt.h>  /* for sei() */
 #include <util/delay.h>     /* for _delay_ms() */
+#include "sin.h"
 
 /* ------------------------------------------------------------------------- */
 
@@ -30,16 +31,29 @@ int __attribute__((noreturn)) main(void)
 {
 
    ADCSRA =0; // disable ADC to save power
-    wdt_enable(WDTO_1S);
+   wdt_enable(WDTO_1S);
+   PRR&=~_BV(PRTIM2); 
     /* Even if you don't use the watchdog, turn it off here. On newer devices,
      * the status of the watchdog (on/off, period) is PRESERVED OVER RESET!
      */
-    /* RESET status: all port bits are inputs without pull-up.
-     * That's the way we need D+ and D-. Therefore we don't need any
-     * additional hardware initialization.
-     */
-    sei();
+
+    TCCR2A =  0x00;
+    TCCR2A |= _BV (COM2A1) | _BV (COM2B1) | _BV (WGM20);
+    TCCR2A &= ~(_BV (COM2A0) | _BV (COM2B0));
+    TCNT2 = 0; 
+        PORTD &= ~(_BV (PORTD3));
+	 DDRD |= _BV (DDD3);
+        uint8_t l=0;
+	  TCCR2B |= _BV (CS20);
+    uint8_t count=0;
+    uint8_t level=0;
+    uint8_t delay=0;
+    uint8_t n=0;
+    uint8_t i=0;
+ 
     for(;;){                /* main event loop */
+	i++;
+                OCR2B=pgm_read_byte_near(sine+i);
         wdt_reset();
         displayPoll();
     }
